@@ -4,27 +4,25 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.functions.Action;
+import io.reactivex.functions.BiFunction;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class Main {
-    
-    public static void main(String[] args) {
-        Observable<List<String>> observable = Observable.create(new ObservableOnSubscribe() {
-            @Override
-            public void subscribe(ObservableEmitter oe) throws Exception {
-                List<String> f = new ArrayList();
-                List<String> s = new ArrayList();
-                f.add("1");
-                f.add("2");
-                s.add("3");
-                oe.onNext(f);
-                oe.onNext(s);
-                oe.onComplete();
-            }
-        });
 
-        observable
+    public static void main(String[] args) {
+        flatMapSample();
+        mergeSample();
+        zipSample();
+
+    }
+
+    private static void flatMapSample() {
+        System.out.println("flatMapSample");
+        
+        getFirstObservable()
                 .flatMap(l -> {
                     return Observable.fromIterable(l);
                 })
@@ -35,8 +33,60 @@ public class Main {
                 }, new Action() {
                     @Override
                     public void run() throws Exception {
-                          System.out.println("OnCompleted");
+                        System.out.println("OnCompleted");
                     }
                 });
+    }
+
+    private static void mergeSample() {
+        System.out.println("mergeSample");
+
+        Observable.merge(Arrays.asList(getFirstObservable(), getSecondObservable()))
+                .subscribe(x -> {
+                    System.out.println(x.toString());
+                });
+    }
+
+    private static void zipSample() {
+        System.out.println("zipSample");
+
+        Observable.zip(getFirstObservable(), getSecondObservable(),
+                new BiFunction<List<String>, List<String>, Collection<List<String>>>() {
+            @Override
+            public Collection<List<String>> apply(List<String> t1, List<String> t2) throws Exception {
+                Collection<List<String>> zipped = Arrays.asList(t1, t2);
+                return zipped;
+            }
+        })
+                .subscribe(x -> {
+                    System.out.println(x.toString());
+                });
+    }
+
+    private static Observable<List<String>> getFirstObservable() {
+        Observable<List<String>> observable = Observable.create(new ObservableOnSubscribe() {
+            @Override
+            public void subscribe(ObservableEmitter oe) throws Exception {
+                List<String> f = Arrays.asList("1", "2");
+                List<String> s = Arrays.asList("3");
+                oe.onNext(f);
+                oe.onNext(s);
+                oe.onComplete();
+            }
+        });
+
+        return observable;
+    }
+   
+    private static Observable<List<String>> getSecondObservable() {
+        Observable<List<String>> observable2 = Observable.create(new ObservableOnSubscribe() {
+            @Override
+            public void subscribe(ObservableEmitter oe) throws Exception {
+                List<String> f = Arrays.asList("4", "5");
+                oe.onNext(f);
+                oe.onComplete();
+            }
+        });
+        return observable2;
     }
 }
