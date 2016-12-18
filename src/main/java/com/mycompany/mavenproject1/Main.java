@@ -3,12 +3,16 @@ package com.mycompany.mavenproject1;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Scheduler;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.BiFunction;
+import io.reactivex.schedulers.Schedulers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
 
@@ -16,6 +20,7 @@ public class Main {
         flatMapSample();
         mergeSample();
         zipSample();
+        concatMapSample();
 
     }
 
@@ -88,5 +93,35 @@ public class Main {
             }
         });
         return observable2;
+    }
+
+    private static void concatMapSample() {
+        System.out.println("concatMapSample");
+        
+        Observable observable = Observable.fromIterable(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
+        Scheduler scheduler = Schedulers.from(executorService);
+
+        System.out.println("flatMap does not respect original order -->");
+        observable
+                .flatMap(l -> {
+                    return Observable.just(l).subscribeOn(scheduler);
+                })
+                .observeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
+                .blockingSubscribe(x -> {
+                    System.out.println(x.toString());
+                });
+        
+        System.out.println("concatMap does -->");
+        observable
+                .concatMap(l -> {
+                    return Observable.just(l).subscribeOn(scheduler);
+                })
+                .observeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
+                .subscribe(x -> {
+                    System.out.println(x.toString());
+                });
+
     }
 }
