@@ -26,7 +26,7 @@ public class Main {
 
     private static void flatMapSample() {
         System.out.println("flatMapSample");
-        
+
         getFirstObservable()
                 .flatMap(l -> {
                     return Observable.fromIterable(l);
@@ -68,36 +68,9 @@ public class Main {
                 });
     }
 
-    private static Observable<List<String>> getFirstObservable() {
-        Observable<List<String>> observable = Observable.create(new ObservableOnSubscribe() {
-            @Override
-            public void subscribe(ObservableEmitter oe) throws Exception {
-                List<String> f = Arrays.asList("1", "2");
-                List<String> s = Arrays.asList("3");
-                oe.onNext(f);
-                oe.onNext(s);
-                oe.onComplete();
-            }
-        });
-
-        return observable;
-    }
-   
-    private static Observable<List<String>> getSecondObservable() {
-        Observable<List<String>> observable2 = Observable.create(new ObservableOnSubscribe() {
-            @Override
-            public void subscribe(ObservableEmitter oe) throws Exception {
-                List<String> f = Arrays.asList("4", "5");
-                oe.onNext(f);
-                oe.onComplete();
-            }
-        });
-        return observable2;
-    }
-
     private static void concatMapSample() {
         System.out.println("concatMapSample");
-        
+
         Observable observable = Observable.fromIterable(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
 
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
@@ -112,7 +85,7 @@ public class Main {
                 .blockingSubscribe(x -> {
                     System.out.println(x.toString());
                 });
-        
+
         System.out.println("concatMap does -->");
         observable
                 .concatMap(l -> {
@@ -123,5 +96,32 @@ public class Main {
                     System.out.println(x.toString());
                 });
 
+    }
+
+    private static Observable<List<String>> getFirstObservable() {
+        Observable<List<String>> observable = Observable.create(new ObservableOnSubscribe() {
+            @Override
+            public void subscribe(ObservableEmitter oe) throws Exception {
+                List<String> f = Arrays.asList("1", "2");
+                List<String> s = Arrays.asList("3");
+                oe.onNext(f);
+                oe.onNext(s);
+                oe.onComplete();
+            }
+        });
+
+        return observable;
+    }
+
+    private static Observable<List<String>> getSecondObservable() {
+        Observable<List<String>> observable2 = Observable.create(new ObservableOnSubscribe() {
+            @Override
+            public void subscribe(ObservableEmitter oe) throws Exception {
+                List<String> f = Arrays.asList("4", "5");
+                oe.onNext(f);
+                oe.onComplete();
+            }
+        });
+        return observable2;
     }
 }
